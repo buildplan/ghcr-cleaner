@@ -7,14 +7,21 @@ on:
 jobs:
   tag-it:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - name: Extract version data
-        id: versions
-        uses: battila7/get-version-action@v2
+      - uses: actions/checkout@v7
 
-      - name: Tag Action
-        uses: richardsimko/update-tag@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: v${{ steps.versions.outputs.major }}
+      - name: Update major version tag
+        run: |
+          # Extract major version (e.g., v1 from v1.2.3)
+          VERSION=${{ github.ref_name }}
+          MAJOR_VERSION=${VERSION%%.*}
+
+          echo "Updating major tag to $MAJOR_VERSION"
+
+          # Force update the major tag to the current commit
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -f $MAJOR_VERSION
+          git push -f origin $MAJOR_VERSION
