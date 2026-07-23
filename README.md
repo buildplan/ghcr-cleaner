@@ -74,7 +74,8 @@ The exact number of package versions that were successfully deleted during the r
       delete-untagged: true
 
 - name: Print deleted count
-  run: echo "Deleted ${{ steps.cleaner.outputs.num_deleted }} images!"
+  run: |
+    echo "Deleted ${{ steps.cleaner.outputs.num_deleted }} images!"
 ```
 
 #### Delete all truly untagged image versions with the given package name.
