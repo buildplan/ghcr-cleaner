@@ -1,5 +1,5 @@
 name: 'GHCR Cleaner'
-author: 'William Forde'
+author: 'buildplan'
 description: 'Delete containers on github container registry without tags'
 branding:
   icon: 'trash-2'
@@ -54,9 +54,9 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - uses: actions/setup-python@v4
+    - uses: actions/setup-python@v7
       with:
-        python-version: '3.10'
+        python-version: '3.14'
 
     - name: Install dependencies
       run: pip install -r ${{ github.action_path }}/requirements.txt
