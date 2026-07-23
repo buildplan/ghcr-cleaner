@@ -130,10 +130,10 @@ DRY_RUN = _args.dry_run
 def request_github_api(url: str, method="GET", **options) -> requests.Response:
     """Make web request to GitHub API, returning response."""
     url = urljoin(GITHUB_API_URL, url)
-    
+
     if os.environ.get("ACTIONS_STEP_DEBUG", "").lower() == "true":
         print(f"DEBUG: {method} {url}")
-        
+
     return requests.request(
         method, url,
         headers={
@@ -293,7 +293,7 @@ def bulk_delete(delete_list: Iterable[Version]) -> int:
     print("")
     print(status_counts[1], Fore.GREEN + "Deletions" + Fore.RESET)
     print(status_counts[0], Fore.RED + "Errors" + Fore.RESET)
-    
+
     if "GITHUB_OUTPUT" in os.environ:
         with open(os.environ["GITHUB_OUTPUT"], "a") as f:
             f.write(f"num_deleted={status_counts[1]}\n")
