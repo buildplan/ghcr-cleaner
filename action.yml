@@ -21,7 +21,7 @@ inputs:
     default: ""
     required: false
   package-name:
-    description: "Delete only from package name."
+    description: "Delete only from comma-separated package names."
     required: false
     default: ""
   owner-type:
@@ -51,6 +51,11 @@ inputs:
     required: false
     default: false
 
+outputs:
+  num_deleted:
+    description: 'Number of package versions that were deleted during the run.'
+    value: ${{ steps.run-cleaner.outputs.num_deleted }}
+
 runs:
   using: "composite"
   steps:
@@ -63,6 +68,7 @@ runs:
       shell: bash
 
     - name: Run registry cleaner
+      id: run-cleaner
       shell: bash
       run: |
         args="--token ${{ inputs.token }} "

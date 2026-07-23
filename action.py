@@ -130,6 +130,10 @@ DRY_RUN = _args.dry_run
 def request_github_api(url: str, method="GET", **options) -> requests.Response:
     """Make web request to GitHub API, returning response."""
     url = urljoin(GITHUB_API_URL, url)
+    
+    if os.environ.get("ACTIONS_STEP_DEBUG", "").lower() == "true":
+        print(f"DEBUG: {method} {url}")
+        
     return requests.request(
         method, url,
         headers={
@@ -198,9 +202,13 @@ class Version:
     def get_deps(self) -> list[str]:
         """Return list of untagged images that this version depends on."""
         if self.tags:
-            manifest = self.pkg.registry.get_manifest(self.digest)
-            manifest = json.loads(manifest)
-            return [arch["digest"] for arch in manifest.get("manifests", [])]
+            try:
+                manifest = self.pkg.registry.get_manifest(self.digest)
+                manifest = json.loads(manifest)
+                return [arch["digest"] for arch in manifest.get("manifests", [])]
+            except Exception as err:
+                print(Fore.RED + "Manifest warning:" + Fore.RESET, f"Could not fetch manifest for {self.digest}: {err}")
+                return []
         else:
             return []
 
@@ -214,11 +222,15 @@ class Version:
         try:
             resp = request_github_api(self.version["url"], method="DELETE")
         except requests.RequestException as err:
-            print(err.response.reason if err.response else "Fatal error")
+            print(err.response.reason if getattr(err, 'response', None) else "Fatal error")
             return False
         else:
-            print(Fore.GREEN + "OK" + Fore.RESET if resp.status_code == 204 else Fore.RED + resp.reason + Fore.RESET)
-            return resp.ok
+            if resp.status_code == 204 or resp.status_code == 404:
+                print(Fore.GREEN + ("OK" if resp.status_code == 204 else "Already deleted (404)") + Fore.RESET)
+                return True
+            else:
+                print(Fore.RED + f"Error: {resp.status_code} {resp.reason}" + Fore.RESET)
+                return False
 
     def __hash__(self):
         return hash(self.id)
@@ -258,14 +270,14 @@ class Package:
             yield Version(self, version)
 
     @classmethod
-    def get_all_packages(cls, owner_type: str, owner: str, repo_name: str, package_name: str) -> Iterable["Package"]:
+    def get_all_packages(cls, owner_type: str, owner: str, repo_name: str, package_names: list) -> Iterable["Package"]:
         """Return an iterator of registry packages."""
         path = f"/{owner_type}s/{owner}/packages?package_type=container"
         for pkg in get_paged_resp(path):
             if repo_name and pkg.get("repository", {}).get("name", "").lower() != repo_name.lower():
                 continue
 
-            if package_name and pkg["name"] != package_name:
+            if package_names and pkg["name"].lower() not in package_names:
                 continue
 
             yield cls(owner, pkg)
@@ -281,16 +293,22 @@ def bulk_delete(delete_list: Iterable[Version]) -> int:
     print("")
     print(status_counts[1], Fore.GREEN + "Deletions" + Fore.RESET)
     print(status_counts[0], Fore.RED + "Errors" + Fore.RESET)
+    
+    if "GITHUB_OUTPUT" in os.environ:
+        with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+            f.write(f"num_deleted={status_counts[1]}\n")
+
     return bool(status_counts[0])
 
 
 def run() -> Iterable[Version]:
     """Scan the GitHub container registry for untagged image versions."""
     # Get list of all packages
+    parsed_package_names = [p.strip().lower() for p in _args.package_name.split(",")] if _args.package_name else []
     all_packages = Package.get_all_packages(
         owner=_args.repo_owner,
         repo_name=_args.repo_name,
-        package_name=_args.package_name,
+        package_names=parsed_package_names,
         owner_type=_args.owner_type,
     )
 

@@ -29,7 +29,7 @@ The repository name. Limits cleaning to only container images linked to the give
 
 ## `package-name`
 
-The package-name. Limits cleaning to image versions for the given package only.
+Delete only from comma-separated package names. Limits cleaning to image versions for the given packages only.
 
 ## `owner-type`
 
