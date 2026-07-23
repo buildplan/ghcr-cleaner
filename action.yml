@@ -1,4 +1,4 @@
-name: 'GHCR Cleaner'
+name: 'Buildplan GHCR Cleaner'
 author: 'buildplan'
 description: 'Delete containers on github container registry without tags'
 branding:
