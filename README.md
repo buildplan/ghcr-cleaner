@@ -55,17 +55,26 @@ List of tags to ignore when using `--keep-at-most`. Accepts tags as Unix shell-s
 
 Run the script without making any changes. Default `false`.
 
+# Outputs
+
+## `num_deleted`
+
+The exact number of package versions that were successfully deleted during the run. Useful for triggering subsequent workflow logic or notifications.
 
 # Usage
 
 #### Delete all truly untagged image versions from all packages for the given owner.
 ```yaml
-- uses: buildplan/ghcr-cleaner@v1
+- id: cleaner
+  uses: buildplan/ghcr-cleaner@v1
   with:
       owner-type: org # or user
       token: ${{ secrets.PAT_TOKEN }}
       repository_owner: ${{ github.repository_owner }}
       delete-untagged: true
+
+- name: Print deleted count
+  run: echo "Deleted ${{ steps.cleaner.outputs.num_deleted }} images!"
 ```
 
 #### Delete all truly untagged image versions with the given package name.
