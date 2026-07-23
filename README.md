@@ -45,11 +45,13 @@ Keep at most the given amount of image versions. Only applies to tagged images. 
 
 ## `filter-tags`
 
-List of tags to filter for when using `--keep-at-most`. Accepts tags as Unix shell-style wildcards.
+Comma-separated list of tags to filter for when using `--keep-at-most`. Accepts tags as Unix shell-style wildcards. 
+Example: `v*, latest`
 
 ## `skip-tags`
 
-List of tags to ignore when using `--keep-at-most`. Accepts tags as Unix shell-style wildcards.
+Comma-separated list of tags to ignore when using `--keep-at-most`. Accepts tags as Unix shell-style wildcards, including bracket expressions.
+Example: `latest, main, [0-9]*.[0-9]*.[0-9]*` (Keeps exact tags 'latest' and 'main', plus any purely numeric semantic version tag).
 
 ## `dry-run`
 
