@@ -1,0 +1,28 @@
+name: Test Action
+
+on:
+  pull_request:
+    branches:
+      - "**"
+  push:
+    branches:
+      - main
+
+jobs:
+  test-action:
+    name: Test Action Dry Run
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Test GHCR Cleaner (Dry Run)
+        uses: ./
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+          owner-type: user
+          dry-run: true
+          repository-owner: ${{ github.repository_owner }}
+          repository-name: "WiredAlter-Term"

@@ -203,8 +203,8 @@ class Version:
         """Return list of untagged images that this version depends on."""
         if self.tags:
             try:
-                manifest = self.pkg.registry.get_manifest(self.digest)
-                manifest = json.loads(manifest)
+                manifest_str = self.pkg.registry.get_manifest_and_response(self.digest)[0]
+                manifest = json.loads(manifest_str)
                 return [arch["digest"] for arch in manifest.get("manifests", [])]
             except Exception as err:
                 print(Fore.RED + "Manifest warning:" + Fore.RESET, f"Could not fetch manifest for {self.digest}: {err}")
