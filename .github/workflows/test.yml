@@ -25,3 +25,4 @@ jobs:
           owner-type: user
           dry-run: true
           repository-owner: ${{ github.repository_owner }}
+          repository-name: "WiredAlter-Term"
