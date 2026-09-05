@@ -21,7 +21,7 @@ jobs:
       - name: Test GHCR Cleaner (Dry Run)
         uses: ./
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT_TOKEN }}
           owner-type: user
           dry-run: true
           repository-owner: ${{ github.repository_owner }}
